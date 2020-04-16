@@ -93,7 +93,19 @@ public class ProductControllerIT {
         Product product = mapper.readValue(response, Product.class);
 
         mockMvc.perform(get("/api/products/{sku}", product.getSku()))
-        .andExpect(status().isOk())
-        .andExpect(content().json(response));
+          .andExpect(status().isOk())
+          .andExpect(content().json(response));
+    }
+
+    @Test
+    public void fetchUnknownProduct() throws Exception {
+        String expected = "{" +
+          "\"status\":404," +
+          "\"errorMessage\":\"Product 9999 not found\"" +
+          "}";
+
+        mockMvc.perform(get("/api/products/9999"))
+          .andExpect(status().isNotFound())
+          .andExpect(content().json(expected));
     }
 }

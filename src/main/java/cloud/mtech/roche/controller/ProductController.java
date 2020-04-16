@@ -15,6 +15,11 @@ public class ProductController {
         this.productService = productService;
     }
 
+    @GetMapping("/{sku}")
+    public Product fetch(@PathVariable("sku") Long sku) {
+        return productService.fetch(sku);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Product create(@RequestBody BasicProduct basicProduct) {
