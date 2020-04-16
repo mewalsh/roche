@@ -11,6 +11,9 @@ import org.mockito.Mock;
 import org.modelmapper.ModelMapper;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import javax.persistence.EntityNotFoundException;
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
@@ -54,5 +57,24 @@ class ProductServiceTest {
         Product actual = productService.save(basicProduct);
 
         assertThat(actual).isEqualTo(product);
+    }
+
+    @Test
+    public void fetch() {
+        when(productRepository.findById(1234L)).thenReturn(Optional.of(productEntity));
+        when(modelMapper.map(productEntity, Product.class)).thenReturn(product);
+
+        Product actual = productService.fetch(1234L);
+
+        assertThat(actual).isEqualTo(product);
+    }
+
+    @Test
+    public void fetchUnknownProduct() {
+        when(productRepository.findById(1234L)).thenReturn(Optional.empty());
+
+        EntityNotFoundException e = assertThrows(EntityNotFoundException.class, () -> productService.fetch(1234L));
+
+        assertThat(e.getMessage()).isEqualTo("Product 1234 not found");
     }
 }

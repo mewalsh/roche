@@ -9,8 +9,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.Optional;
+
+import static java.lang.String.format;
 
 @Service
 @Validated
@@ -22,6 +26,12 @@ public class ProductService {
     public ProductService(ProductRepository productRepository, ModelMapper modelMapper) {
         this.productRepository = productRepository;
         this.modelMapper = modelMapper;
+    }
+
+    public Product fetch(@NonNull @NotNull Long sku) {
+        return productRepository.findById(sku)
+          .map(this::mapToDto)
+          .orElseThrow(() -> entityNotFound(sku));
     }
 
     public Product save(@NonNull @Valid BasicProduct product) {
@@ -38,5 +48,9 @@ public class ProductService {
 
     private Product mapToDto(ProductEntity product) {
         return modelMapper.map(product, Product.class);
+    }
+
+    private EntityNotFoundException entityNotFound(Long sku) {
+        return new EntityNotFoundException(format("Product %d not found", sku));
     }
 }

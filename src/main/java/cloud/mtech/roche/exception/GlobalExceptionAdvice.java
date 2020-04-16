@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.persistence.EntityNotFoundException;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.util.List;
@@ -16,10 +17,21 @@ import java.util.List;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @ControllerAdvice(basePackageClasses = ProductController.class)
 @Slf4j
 public class GlobalExceptionAdvice {
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseBody
+    public ResponseEntity<ApiError> entityNotFoundException(EntityNotFoundException e) {
+        logClientException(e);
+
+        ApiError error = new ApiError(NOT_FOUND.value(), e.getMessage());
+
+        return errorResponse(error);
+    }
 
     @ExceptionHandler(HttpMessageConversionException.class)
     @ResponseBody
