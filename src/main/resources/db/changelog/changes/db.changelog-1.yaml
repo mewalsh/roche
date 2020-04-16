@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: martinw
+      changes:
+        - createTable:
+            tableName: product
+            columns:
+              - column:
+                  name: sku
+                  type: bigint
+                  autoIncrement: true
+                  startWith: 1000
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(512)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: currency
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created
+                  type: datetime
+                  defaultValueComputed: current_timestamp
