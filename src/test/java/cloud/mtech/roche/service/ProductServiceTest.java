@@ -60,6 +60,29 @@ class ProductServiceTest {
     }
 
     @Test
+    public void update() {
+        when(modelMapper.map(productEntity, Product.class)).thenReturn(product);
+        when(productRepository.findById(123L)).thenReturn(Optional.of(productEntity));
+        when(productRepository.save(productEntity)).thenReturn(productEntity);
+
+        Product actual = productService.update(123L, basicProduct);
+
+        assertThat(actual).isEqualTo(product);
+    }
+
+    @Test
+    public void updateUnknown() {
+        when(productRepository.existsById(123L)).thenReturn(false);
+
+        EntityNotFoundException e = assertThrows(
+          EntityNotFoundException.class,
+          () -> productService.update(123L, basicProduct)
+        );
+
+        assertThat(e.getMessage()).isEqualTo("Product 123 not found");
+    }
+
+    @Test
     public void fetch() {
         when(productRepository.findById(1234L)).thenReturn(Optional.of(productEntity));
         when(modelMapper.map(productEntity, Product.class)).thenReturn(product);

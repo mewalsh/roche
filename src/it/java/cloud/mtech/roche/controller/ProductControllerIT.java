@@ -17,8 +17,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.math.BigDecimal;
 
 import static org.hamcrest.Matchers.notNullValue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -107,5 +106,51 @@ public class ProductControllerIT {
         mockMvc.perform(get("/api/products/9999"))
           .andExpect(status().isNotFound())
           .andExpect(content().json(expected));
+    }
+
+    @Test
+    public void updateExistingProduct() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/products")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(mapper.writeValueAsBytes(product)))
+          .andExpect(status().isCreated())
+          .andReturn();
+
+        String response = result.getResponse().getContentAsString();
+        Product product = mapper.readValue(response, Product.class);
+
+        product.setName("updated");
+        String expected = mapper.writeValueAsString(product);
+
+        mockMvc.perform(put("/api/products/{sku}", product.getSku())
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(mapper.writeValueAsBytes(product)))
+          .andExpect(status().isOk())
+          .andExpect(content().json(expected));
+
+        mockMvc.perform(get("/api/products/{sku}", product.getSku()))
+          .andExpect(status().isOk())
+          .andExpect(content().json(expected));
+    }
+
+    @Test
+    public void updateUnknownProduct() throws Exception {
+        Product product = Product.builder()
+          .sku(9999L)
+          .name("existing_sku")
+          .price(BigDecimal.ONE)
+          .build();
+
+        String expected = "{" +
+          "\"status\":404," +
+          "\"errorMessage\":\"Product 9999 not found\"" +
+          "}";
+
+        mockMvc.perform(put("/api/products/{sku}", product.getSku())
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(mapper.writeValueAsBytes(product)))
+          .andExpect(status().isNotFound())
+          .andExpect(content().json(expected));
+
     }
 }

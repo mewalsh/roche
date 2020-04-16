@@ -45,4 +45,13 @@ class ProductControllerTest {
 
         assertThat(actual).isEqualTo(product);
     }
+
+    @Test
+    public void update() {
+        when(productService.update(123L, basicProduct)).thenReturn(product);
+
+        Product actual = productController.update(123L, basicProduct);
+
+        assertThat(actual).isEqualTo(product);
+    }
 }

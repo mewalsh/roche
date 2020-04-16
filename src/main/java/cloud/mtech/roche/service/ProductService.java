@@ -42,6 +42,25 @@ public class ProductService {
           .orElseThrow();
     }
 
+    public Product update(@NonNull @NotNull Long sku, @NonNull @Valid BasicProduct product) {
+        return Optional.of(sku)
+          .flatMap(productRepository::findById)
+          .map(entity -> mapToEntity(product, entity))
+          .map(productRepository::save)
+          .map(this::mapToDto)
+          .orElseThrow(() -> entityNotFound(sku));
+    }
+
+    private ProductEntity updateSku(Long sku, ProductEntity entity) {
+        entity.setSku(sku);
+        return entity;
+    }
+
+    private ProductEntity mapToEntity(BasicProduct source, ProductEntity dest) {
+        modelMapper.map(source, dest);
+        return dest;
+    }
+
     private ProductEntity mapToEntity(BasicProduct product) {
         return modelMapper.map(product, ProductEntity.class);
     }

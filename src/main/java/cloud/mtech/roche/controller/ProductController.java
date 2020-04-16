@@ -25,4 +25,9 @@ public class ProductController {
     public Product create(@RequestBody BasicProduct basicProduct) {
         return productService.save(basicProduct);
     }
+
+    @PutMapping("/{sku}")
+    public Product update(@PathVariable("sku") Long sku, @RequestBody BasicProduct basicProduct) {
+        return productService.update(sku, basicProduct);
+    }
 }
