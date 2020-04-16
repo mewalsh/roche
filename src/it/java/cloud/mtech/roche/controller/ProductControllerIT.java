@@ -1,7 +1,9 @@
 package cloud.mtech.roche.controller;
 
 import cloud.mtech.roche.dto.BasicProduct;
+import cloud.mtech.roche.dto.Product;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +12,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
 
 import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -26,18 +30,23 @@ public class ProductControllerIT {
     @Autowired
     private MockMvc mockMvc;
 
-    @Test
-    public void createProduct() throws Exception {
-        BasicProduct product = BasicProduct.builder()
+    private BasicProduct product;
+
+    @BeforeEach
+    public void setup() {
+        product = BasicProduct.builder()
           .name("test")
           .price(BigDecimal.TEN)
           .build();
+    }
 
+    @Test
+    public void createProduct() throws Exception {
         String expected = mapper.writeValueAsString(product);
 
         mockMvc.perform(post("/api/products")
           .contentType(MediaType.APPLICATION_JSON)
-          .content(mapper.writeValueAsBytes(product)))
+          .content(expected))
           .andExpect(status().isCreated())
           .andExpect(content().json(expected))
           .andExpect(jsonPath("$.sku", notNullValue()))
@@ -70,5 +79,21 @@ public class ProductControllerIT {
           .contentType(MediaType.APPLICATION_JSON)
           .content("bad_json"))
           .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void fetchProduct() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/products")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(mapper.writeValueAsBytes(product)))
+          .andExpect(status().isCreated())
+          .andReturn();
+
+        String response = result.getResponse().getContentAsString();
+        Product product = mapper.readValue(response, Product.class);
+
+        mockMvc.perform(get("/api/products/{sku}", product.getSku()))
+        .andExpect(status().isOk())
+        .andExpect(content().json(response));
     }
 }
