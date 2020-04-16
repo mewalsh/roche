@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -97,6 +98,24 @@ class ProductServiceTest {
         when(productRepository.findById(1234L)).thenReturn(Optional.empty());
 
         EntityNotFoundException e = assertThrows(EntityNotFoundException.class, () -> productService.fetch(1234L));
+
+        assertThat(e.getMessage()).isEqualTo("Product 1234 not found");
+    }
+
+    @Test
+    public void delete() {
+        when(productRepository.findById(1234L)).thenReturn(Optional.of(productEntity));
+
+        productService.delete(1234L);
+
+        verify(productRepository).delete(productEntity);
+    }
+
+    @Test
+    public void deleteUnknownProduct() {
+        when(productRepository.findById(1234L)).thenReturn(Optional.empty());
+
+        EntityNotFoundException e = assertThrows(EntityNotFoundException.class, () -> productService.delete(1234L));
 
         assertThat(e.getMessage()).isEqualTo("Product 1234 not found");
     }

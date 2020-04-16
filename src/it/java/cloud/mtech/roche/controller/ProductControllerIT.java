@@ -153,4 +153,35 @@ public class ProductControllerIT {
           .andExpect(content().json(expected));
 
     }
+
+    @Test
+    public void deleteExistingProduct() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/products")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(mapper.writeValueAsBytes(product)))
+          .andExpect(status().isCreated())
+          .andReturn();
+
+        String response = result.getResponse().getContentAsString();
+        Product product = mapper.readValue(response, Product.class);
+
+        mockMvc.perform(delete("/api/products/{sku}", product.getSku()))
+          .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/api/products/{sku}", product.getSku()))
+          .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void deleteUnknownProduct() throws Exception {
+        String expected = "{" +
+          "\"status\":404," +
+          "\"errorMessage\":\"Product 9999 not found\"" +
+          "}";
+
+        mockMvc.perform(delete("/api/products/9999"))
+          .andExpect(status().isNotFound())
+          .andExpect(content().json(expected));
+
+    }
 }

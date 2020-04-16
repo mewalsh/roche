@@ -30,4 +30,10 @@ public class ProductController {
     public Product update(@PathVariable("sku") Long sku, @RequestBody BasicProduct basicProduct) {
         return productService.update(sku, basicProduct);
     }
+
+    @DeleteMapping("/{sku}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable("sku") Long sku) {
+        productService.delete(sku);
+    }
 }

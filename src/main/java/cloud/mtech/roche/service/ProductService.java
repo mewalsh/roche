@@ -51,9 +51,9 @@ public class ProductService {
           .orElseThrow(() -> entityNotFound(sku));
     }
 
-    private ProductEntity updateSku(Long sku, ProductEntity entity) {
-        entity.setSku(sku);
-        return entity;
+    public void delete(@NonNull @NotNull Long sku) {
+        productRepository.findById(sku)
+          .ifPresentOrElse(productRepository::delete, () -> throwEntityNotFoundException(sku));
     }
 
     private ProductEntity mapToEntity(BasicProduct source, ProductEntity dest) {
@@ -67,6 +67,10 @@ public class ProductService {
 
     private Product mapToDto(ProductEntity product) {
         return modelMapper.map(product, Product.class);
+    }
+
+    private void throwEntityNotFoundException(Long sku) {
+        throw entityNotFound(sku);
     }
 
     private EntityNotFoundException entityNotFound(Long sku) {

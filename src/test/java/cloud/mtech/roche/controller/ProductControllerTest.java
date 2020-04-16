@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -53,5 +54,12 @@ class ProductControllerTest {
         Product actual = productController.update(123L, basicProduct);
 
         assertThat(actual).isEqualTo(product);
+    }
+
+    @Test
+    public void delete() {
+        productController.delete(123L);
+
+        verify(productService).delete(123L);
     }
 }
